@@ -1,40 +1,66 @@
-const socket = new WebSocket(`ws://${window.location.host}`);
-const messageList = document.querySelector("ul");
-const messageForm = document.querySelector("#message");
-const nickForm = document.querySelector("#nickname");
+const socket = io();
 
-function makeMessage(type, payload) {
-  const msg = { type, payload };
-  return JSON.stringify(msg);
+const welcome = document.getElementById("welcome");
+const form = welcome.querySelector("form");
+const room = document.getElementById("room");
+
+room.hidden = true;
+
+let roomName;
+
+function handleMessageSubmit(event) {
+  event.preventDefault();
+  const input = room.querySelector("#msg input");
+  const value = input.value;
+  socket.emit("new_message", input.value, roomName, () => {
+    addMessage(`You: ${value}`);
+  });
+  input.value = "";
 }
 
-socket.addEventListener("open", () => {
-  console.log("Connected to Server ✅");
-});
+// function handleNicknameSubmit(event) {
+//   event.preventDefault();
+//   const input = room.querySelector("#name input");
+//   const value = input.value;
+//   socket.emit("nickname", input.value);
+// }
 
-socket.addEventListener("message", (message) => {
+function showRoom() {
+  welcome.hidden = true;
+  room.hidden = false;
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName}`;
+  const msgForm = room.querySelector("#msg");
+  msgForm.addEventListener("submit", handleMessageSubmit);
+}
+
+function handleRoomSubmit(event) {
+  event.preventDefault();
+  const nickname = form.querySelector("input[name=nickname]");
+  const newroom = form.querySelector("input[name=room]");
+  socket.emit("enter_room", newroom.value, nickname.value, showRoom);
+  roomName = newroom.value;
+  input.value = "";
+}
+
+form.addEventListener("submit", handleRoomSubmit);
+
+function addMessage(message) {
+  const ul = room.querySelector("ul");
   const li = document.createElement("li");
-  li.innerText = message.data;
-  messageList.append(li);
-});
-
-socket.addEventListener("close", () => {
-  console.log("Disconnected form Server ❌");
-});
-
-function handleSubmit(event) {
-  event.preventDefault();
-  const input = messageForm.querySelector("input");
-  socket.send(makeMessage("new_message", input.value));
-  input.value = "";
+  li.innerText = message;
+  ul.appendChild(li);
 }
 
-function handleNickSubmit(event) {
-  event.preventDefault();
-  const input = nickForm.querySelector("input");
-  socket.send(makeMessage("nickname", input.value));
-  input.value = "";
-}
+socket.on("welcome", (user) => {
+  addMessage(`${user} arrived!`);
+});
 
-messageForm.addEventListener("submit", handleSubmit);
-nickForm.addEventListener("submit", handleNickSubmit);
+socket.on("bye", (left) => {
+  addMessage(`${left} left`);
+});
+
+socket.on("new_message", (msg) => {
+  addMessage(msg);
+});
+//addMessage만 넣어도 (meg)=>{addMessage(msg)}와 같음
