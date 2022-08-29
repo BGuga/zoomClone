@@ -14,7 +14,7 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
-const Serveropen = () =>
+const serveropen = () =>
   console.log(`server is listening in http://localhost:${PORT}`);
 
 const httpServer = http.createServer(app);
@@ -94,4 +94,4 @@ wsServer.on("connection", (socket) => {
 //   });
 // });
 
-httpServer.listen(PORT, Serveropen);
+httpServer.listen(PORT, serveropen);
