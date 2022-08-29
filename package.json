@@ -4,7 +4,8 @@
   "description": "",
   "license": "MIT",
   "scripts": {
-    "start": "babel-node src/server.js"
+    "start": "node build/server.js",
+    "build": "babel src -d build"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
