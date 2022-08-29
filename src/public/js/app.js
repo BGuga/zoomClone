@@ -40,7 +40,8 @@ function handleRoomSubmit(event) {
   const newroom = form.querySelector("input[name=room]");
   socket.emit("enter_room", newroom.value, nickname.value, showRoom);
   roomName = newroom.value;
-  input.value = "";
+  nickname.value = "";
+  newroom.value = "";
 }
 
 form.addEventListener("submit", handleRoomSubmit);
@@ -52,11 +53,16 @@ function addMessage(message) {
   ul.appendChild(li);
 }
 
-socket.on("welcome", (user) => {
+socket.on("welcome", (user, newCount) => {
+  console.log(newCount);
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${user} arrived!`);
 });
 
-socket.on("bye", (left) => {
+socket.on("bye", (left, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${left} left`);
 });
 
@@ -64,3 +70,16 @@ socket.on("new_message", (msg) => {
   addMessage(msg);
 });
 //addMessage만 넣어도 (meg)=>{addMessage(msg)}와 같음
+
+socket.on("room_change", (rooms) => {
+  const roomList = welcome.querySelector("ul");
+  roomList.innerHTML = "";
+  if (rooms.length === 0) {
+    return;
+  }
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = room;
+    roomList.append(li);
+  });
+});
