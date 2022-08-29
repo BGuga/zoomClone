@@ -54,7 +54,6 @@ function addMessage(message) {
 }
 
 socket.on("welcome", (user, newCount) => {
-  console.log(newCount);
   const h3 = room.querySelector("h3");
   h3.innerText = `Room ${roomName} (${newCount})`;
   addMessage(`${user} arrived!`);
