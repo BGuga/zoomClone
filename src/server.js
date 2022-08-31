@@ -21,16 +21,16 @@ const wsServer = SocketIO(httpServer);
 wsServer.on("connection", (socket) => {
   socket.on("join_room", (roomName) => {
     socket.join(roomName);
-    socket.to(roomName).emit("welcome");
+    socket.to(roomName).emit("welcome", socket.id);
   });
-  socket.on("offer", (offer, roomName) => {
-    socket.to(roomName).emit("offer", offer);
+  socket.on("offer", (offer, peerId) => {
+    socket.to(peerId).emit("offer", offer, socket.id);
   });
-  socket.on("answer", (answer, roomName) => {
-    socket.to(roomName).emit("answer", answer);
+  socket.on("answer", (answer, peerId) => {
+    socket.to(peerId).emit("answer", answer, socket.id);
   });
-  socket.on("ice", (ice, roomName) => {
-    socket.to(roomName).emit("ice", ice);
+  socket.on("ice", (ice, newmember) => {
+    socket.to(newmember).emit("ice", ice, socket.id);
   });
 });
 
