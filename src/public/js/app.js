@@ -87,6 +87,9 @@ function handleCameraClick() {
 
 async function handleCameraChange() {
   await getMedia(camerasSelect.value);
+  if (myPeerConnection) {
+    console.log(myPeerConnection.getSenders());
+  }
 }
 
 muteBtn.addEventListener("click", handleMuteClick);
@@ -128,7 +131,9 @@ socket.on("welcome", async () => {
 socket.on("offer", async (offer) => {
   console.log("received the offer");
   myPeerConnection.setRemoteDescription(offer);
+  console.log(offer);
   const answer = await myPeerConnection.createAnswer();
+  console.log(answer);
   myPeerConnection.setLocalDescription(answer);
   socket.emit("answer", answer, roomName);
   console.log("send the answer");
