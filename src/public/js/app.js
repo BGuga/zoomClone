@@ -22,6 +22,7 @@ camerasSelect.appendChild(option);
 async function getCameras() {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log(devices);
     const cameras = devices.filter((device) => device.kind === "videoinput");
     const currentCamera = myStream.getVideoTracks()[0];
     cameras.forEach((camera) => {
@@ -88,7 +89,11 @@ function handleCameraClick() {
 async function handleCameraChange() {
   await getMedia(camerasSelect.value);
   if (myPeerConnection) {
-    console.log(myPeerConnection.getSenders());
+    const videoTrack = myStream.getVideoTracks()[0];
+    const videoSender = myPeerConnection
+      .getSenders()
+      .find((sender) => sender.track.kind === "video");
+    videoSender.replaceTrack(videoTrack);
   }
 }
 
@@ -152,7 +157,19 @@ socket.on("ice", (ice) => {
 // RTC Code
 
 function makeConnection() {
-  myPeerConnection = new RTCPeerConnection();
+  myPeerConnection = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302",
+          "stun:stun2.l.google.com:19302",
+          "stun:stun3.l.google.com:19302",
+          "stun:stun4.l.google.com:19302",
+        ],
+      },
+    ],
+  });
   myPeerConnection.addEventListener("icecandidate", handleIce);
   myPeerConnection.addEventListener("addstream", handleAddStream);
   myStream
