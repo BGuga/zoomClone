@@ -137,10 +137,10 @@ socket.on("offer", async (offer, peerId) => {
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
+  console.log("send the answer");
+  socket.emit("answer", answer, peerId);
   myPeerConnection.setLocalDescription(answer);
   peers[peerId] = myPeerConnection;
-  socket.emit("answer", answer, peerId);
-  console.log("send the answer");
 });
 
 socket.on("answer", (answer, peerId) => {
@@ -148,9 +148,11 @@ socket.on("answer", (answer, peerId) => {
   peers[peerId].setRemoteDescription(answer);
 });
 
-socket.on("ice", (ice, newmember) => {
-  console.log("received candidate");
-  peers[newmember].addIceCandidate(ice);
+socket.on("ice", (ice, peerId, iam) => {
+  if (peers[peerId].currentTarget.remoteDescription === iam) {
+    console.log("received candidate");
+    peers[peerId].addIceCandidate(ice);
+  }
 });
 
 // RTC Code
@@ -164,16 +166,17 @@ async function makeConnection(peerId) {
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
   const offer = await myPeerConnection.createOffer();
-  myPeerConnection.setLocalDescription(offer);
   console.log("send the offer");
   socket.emit("offer", offer, peerId);
+  myPeerConnection.setLocalDescription(offer);
   peers[peerId] = myPeerConnection;
   newmember = peerId;
 }
 
 function handleIce(data) {
+  const iam = data.currentTarget.localDescription;
   console.log("sent candidate");
-  socket.emit("ice", data.candidate, newmember);
+  socket.emit("ice", data.candidate, roomName, iam);
 }
 
 function handleAddStream(data) {

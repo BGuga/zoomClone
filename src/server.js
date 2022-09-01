@@ -29,8 +29,8 @@ wsServer.on("connection", (socket) => {
   socket.on("answer", (answer, peerId) => {
     socket.to(peerId).emit("answer", answer, socket.id);
   });
-  socket.on("ice", (ice, newmember) => {
-    socket.to(newmember).emit("ice", ice, socket.id);
+  socket.on("ice", (ice, roomName, iam) => {
+    socket.to(roomName).emit("ice", ice, socket.id, iam);
   });
 });
 
