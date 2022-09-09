@@ -10,7 +10,7 @@ app.set("views", process.cwd() + "/src/views");
 
 app.use("/assets", express.static("src/public/"));
 app.get("/", (req, res) => res.render("home"));
-app.get("/*", (req, res) => res.redirect("/"));
+app.get("/test", (req, res) => res.render("home2"));
 
 const Serveropen = () =>
   console.log(`server is listening in http://localhost:${PORT}`);
@@ -19,6 +19,22 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
+  socket.on("join_room", (roomName) => {
+    socket.join(roomName);
+    socket.to(roomName).emit("welcome");
+  });
+  socket.on("offer", (offer, roomName) => {
+    socket.to(roomName).emit("offer", offer);
+  });
+  socket.on("answer", (answer, roomName) => {
+    socket.to(roomName).emit("answer", answer);
+  });
+  socket.on("ice", (ice, roomName) => {
+    socket.to(roomName).emit("ice", ice);
+  });
+});
+
+wsServer.of("/test").on("connection", (socket) => {
   socket.on("join_room", (roomName) => {
     socket.join(roomName);
     socket.to(roomName).emit("welcome");
