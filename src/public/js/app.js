@@ -140,7 +140,7 @@ socket.on("welcome", async () => {
 socket.on("offer", async (offer) => {
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
-    myDataChannel.addEventListener("message", console.log);
+      
   });
   console.log("received the offer");
   myPeerConnection.setRemoteDescription(offer);
